@@ -70,6 +70,11 @@ optparse = OptionParser.new do|opts|
     $options[:type] = input
   end
 
+  $options[:fuzzer] = nil
+  opts.on( '-f [ wfuzz | gobuster ]', 'Wfuzz or Gobuster? Defualt is both!' ) do|input|
+    $options[:fuzzer] = input
+  end
+
   $options[:noColour] = false
   opts.on( '--no-colour', 'Removes colourisation from the ourput' ) do
     $options[:noColour] = true
@@ -177,7 +182,7 @@ end
 
 class Scan
 
-  def initialize(input, type)
+  def initialize(input, type, fuzzer)
     # Setup instance variables
     # Original code allows for subnets to be included in @input, but as this wasn't implemented into inqServices @inputAlt removes the trailing subnet.
     # As both Nikto and Wfuzz need the protocol and/or port, I will need to use @input, but I need to sub out the "bad" chars for output names
@@ -222,6 +227,18 @@ class Scan
       @nikto = true
       @fuzz = true
     end
+
+    # Configure boolean for scan logic
+    if fuzzer == "wfuzz"
+      @wfuzz = true
+      @gobuster = false
+    elsif fuzzer == "gobuster"
+      @wfuzz = false
+      @gobuster = true
+    else
+      @wfuzz = true
+      @gobuster = true
+    end    
     
     # Specifies the wordlists which will be used by wfuzz, in order.
     # TODO: Make this configuration better
@@ -250,19 +267,6 @@ class Scan
     
   end
 
-  def initialTCP()
-    scanTypeNum = 0
-    statsEvery = 300
-    puts "Commencing #{@scanType[scanTypeNum]} scan against [#{@input}]".notification
-    output = @scanLocation[@scanType[scanTypeNum]]
-    options = ["-sS", "-F", "--disable-arp-ping"]
-    options = options.join(" ")  
-    
-    system("nmap #{options} -v --stats-every #{statsEvery} -oA #{output} #{@input} > #{output}.log")
-    puts "#{@scanType[scanTypeNum]} scan against [#{@input}] complete!".success  
-    return true
-  end
-
   def nikto()
     if @nikto
       # Prepare to jump out to bash execution
@@ -282,7 +286,7 @@ class Scan
   end
 
   def wfuzz()
-    if @fuzz
+    if @fuzz && @wfuzz
       # Prepare to jump out to bash execution
       outputFile = "#{@baseDir}/wfuzz_#{@inputAlt}.txt"
       puts "The following Wfuzz dictionaries will be executed in order:".event
@@ -314,6 +318,40 @@ class Scan
     end
   end
 
+  def gobuster()
+    if @fuzz && @gobuster
+      # Prepare to jump out to bash execution
+      outputFile = "#{@baseDir}/gobuster_#{@inputAlt}.txt"
+      puts "The following Gobuster dictionaries will be executed in order:".event
+      dictCount = 0
+      @wfuzzDict.each_with_index do |dict,count|     
+        puts "[#{'%02d' % (count + 1)}] #{dict}".notification
+        dictCount += 1
+      end
+      puts ""
+      puts "Commencing Gobuster against [#{@input}]".event
+      puts ""
+      # This will overwrite a files of the same name if it exists.
+      output = File.open("#{outputFile}", "w+")
+      output.close
+      options = ["-s 200,204,301,302,307,403"]
+      options = options.join(" ")  
+
+      # Execute Gobuster for all configured wordlists
+      @wfuzzDict.each_with_index do |dict,count|       
+        cmd = "gobuster -u #{@input} -k -l #{options} -w \"#{dict}\""
+        puts cmd.debug
+        `echo #{cmd.debug} >> #{outputFile}`
+        `#{cmd} | tee -a #{outputFile}`
+        puts "Complete [#{'%02d' % (count + 1)}/#{'%02d' % dictCount}]: #{dict}".event
+      end
+          
+      puts ""
+      puts "Gobuster against [#{@input}] complete! See [#{outputFile}]".success  
+      puts ""
+    end
+  end
+
   # For lack of a better way, use these functions to return the base filename and location of each scan file
 #  def initialTCP_location
 #    @scanLocation[@scanType[0]]
@@ -329,12 +367,13 @@ def scan(input)
   puts "Commencing scan against [#{input}]".event
   puts ""
 
-  scan = Scan.new(input, $options[:type])
+  scan = Scan.new(input, $options[:type], $options[:fuzzer])
   threads = []
   
   # General Thread Execution
   threads << Thread.new {scan.nikto}
   threads << Thread.new {scan.wfuzz}
+  threads << Thread.new {scan.gobuster}
   ThreadsWait.all_waits(*threads)
  
   # Trivial to add this infomration for <input> into a database for reference later.
@@ -344,7 +383,7 @@ def scan(input)
   #puts scan.initialTCP_C_location.debug
   #puts scan.allPortsTCP_C_location.debug
 
-  puts "Nikto/Wfuzz scans completed for [#{input}]".success
+  puts "Scans completed for [#{input}]".success
   puts ""
 
 end
