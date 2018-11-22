@@ -210,6 +210,10 @@ class Scan
       @inputAlt = @inputAlt.sub ':', '-'
     end
 
+    while @inputAlt.include? '/' do
+      @inputAlt = @inputAlt.sub '/', '-'
+    end
+
     # Prefix the name of the script
     @inputAlt = "inqHTTP_#{@inputAlt}"
 
