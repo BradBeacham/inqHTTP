@@ -249,15 +249,15 @@ class Scan
     @wfuzzDict = [
       "/usr/share/dirb/wordlists/common.txt", 
       "/usr/share/dirb/wordlists/vulns/tomcat.txt", 
-      "/usr/share/wordlists/Top1000-RobotsDisallowed.txt", 
-      "/root/_00.Scripts/PenetrationTesting/WordLists/SecLists/Discovery/Web-Content/nginx.txt",
-      "/root/_00.Scripts/PenetrationTesting/WordLists/SecLists/Discovery/Web-Content/apache.txt", 
-      "/root/_00.Scripts/PenetrationTesting/WordLists/SecLists/Discovery/Web-Content/ApacheTomcat.fuzz.txt", 
-      "/root/_00.Scripts/PenetrationTesting/WordLists/SecLists/Discovery/Web-Content/CMS/sharepoint.txt", 
-      "/root/_00.Scripts/PenetrationTesting/WordLists/SecLists/Discovery/Web-Content/iis.txt", 
-      "/root/_00.Scripts/PenetrationTesting/WordLists/SecLists/Discovery/Web-Content/CMS/sharepoint.txt", 
-      "/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt", 
-      "/root/_00.Scripts/PenetrationTesting/WordLists/SecLists/Discovery/Web-Content/big.txt"
+      "/usr/share/wordlists/wildkindcc/RobotsDisallowed/top10000.txt", 
+      "/usr/share/wordlists/wildkindcc/WordLists/SecLists/Discovery/Web-Content/nginx.txt",
+      "/usr/share/wordlists/wildkindcc/WordLists/SecLists/Discovery/Web-Content/apache.txt", 
+      "/usr/share/wordlists/wildkindcc/WordLists/SecLists/Discovery/Web-Content/ApacheTomcat.fuzz.txt", 
+      "/usr/share/wordlists/wildkindcc/WordLists/SecLists/Discovery/Web-Content/CMS/sharepoint.txt", 
+      "/usr/share/wordlists/wildkindcc/WordLists/SecLists/Discovery/Web-Content/iis.txt", 
+      "/usr/share/wordlists/wildkindcc/WordLists/SecLists/Discovery/Web-Content/CMS/sharepoint.txt", 
+      #"/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt", 
+      "/usr/share/wordlists/wildkindcc/WordLists/SecLists/Discovery/Web-Content/big.txt"
     ]
     @scanLocation = Hash.new
 
