@@ -343,7 +343,7 @@ class Scan
 
       # Execute Gobuster for all configured wordlists
       @wfuzzDict.each_with_index do |dict,count|       
-        cmd = "gobuster -u #{@input} -k -l #{options} -w \"#{dict}\""
+        cmd = "gobuster dir -u #{@input} -k -l #{options} -w \"#{dict}\""
         puts cmd.debug
         `echo #{cmd.debug} >> #{outputFile}`
         `#{cmd} | tee -a #{outputFile}`
